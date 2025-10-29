@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Usuarios</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        body {
+            background-color: #eef2f6;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* 🔹 Navbar azul oscuro */
+        .navbar {
+            background: linear-gradient(90deg, #001f3f, #003366);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .navbar-brand {
+            color: #ffffff !important;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            transition: all 0.2s;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        /* 🔹 Contenedor */
+        .content-container {
+            margin-top: 70px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background-color: #003366;
+            border: none;
+            transition: background 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #00264d;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+            border: none;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background-color: #bb2d3b;
+        }
+
+        .modal-header {
+            background-color: #003366;
+            color: white;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f5ff;
+            transition: 0.2s;
+        }
+
+        .alert {
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 🔹 NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand" href="#">Gestión de Usuarios</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link active" th:href="@{/usuarios}">Usuarios</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/servicios}">Servicios</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/citas}">Citas</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- 🔹 CONTENIDO -->
+<div class="container content-container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="text-dark">Lista de Usuarios</h3>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#usuarioModal" onclick="limpiarFormulario()">+ Nuevo Usuario</button>
+    </div>
+
+    <table class="table table-hover table-striped align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="u : ${usuarios}">
+                <td th:text="${u.id}"></td>
+                <td th:text="${u.nombre}"></td>
+                <td th:text="${u.email}"></td>
+                <td th:text="${u.telefono}"></td>
+                <td class="text-center">
+                    <button class="btn btn-warning btn-sm"
+                            data-bs-toggle="modal" data-bs-target="#usuarioModal"
+                            th:data-id="${u.id}"
+                            th:data-nombre="${u.nombre}"
+                            th:data-email="${u.email}"
+                            th:data-telefono="${u.telefono}"
+                            onclick="editarUsuarioModal(this)">Editar</button>
+                    <a th:href="@{/usuarios/eliminar/{id}(id=${u.id})}" class="btn btn-danger btn-sm"
+                       onclick="return confirm('¿Seguro que desea eliminar este usuario?');">Eliminar</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- 🔹 MODAL -->
+<div class="modal fade" id="usuarioModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form th:action="@{/usuarios/guardar}" method="post" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Nuevo Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="id" name="id"/>
+                <div class="mb-3">
+                    <label>Nombre</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required/>
+                </div>
+                <div class="mb-3">
+                    <label>Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required/>
+                </div>
+                <div class="mb-3">
+                    <label>Teléfono</label>
+                    <input type="text" class="form-control" id="telefono" name="telefono"/>
+                </div>
+                <div class="mb-3">
+                    <label>Contraseña</label>
+                    <input type="password" class="form-control" id="nuevaPassword" name="nuevaPassword"/>
+                    <small class="text-muted">Solo llenar si desea cambiar la contraseña</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function editarUsuarioModal(btn) {
+        document.getElementById('modalTitle').innerText = 'Editar Usuario';
+        document.getElementById('id').value = btn.getAttribute('data-id');
+        document.getElementById('nombre').value = btn.getAttribute('data-nombre');
+        document.getElementById('email').value = btn.getAttribute('data-email');
+        document.getElementById('telefono').value = btn.getAttribute('data-telefono');
+        document.getElementById('nuevaPassword').value = '';
+    }
+
+    function limpiarFormulario() {
+        document.getElementById('modalTitle').innerText = 'Nuevo Usuario';
+        document.getElementById('id').value = '';
+        document.getElementById('nombre').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('telefono').value = '';
+        document.getElementById('nuevaPassword').value = '';
+    }
+</script>
+
+</body>
+</html>
