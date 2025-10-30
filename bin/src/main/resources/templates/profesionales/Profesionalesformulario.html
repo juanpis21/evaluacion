@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${profesional.id != null ? 'Editar Profesional' : 'Nuevo Profesional'}"></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+
+<h2 th:text="${profesional.id != null ? 'Editar Profesional' : 'Nuevo Profesional'}"></h2>
+
+<form th:action="@{/profesionales/guardar}" th:object="${profesional}" method="post" class="mt-4">
+    <input type="hidden" th:field="*{id}">
+
+    <div class="mb-3">
+        <label class="form-label">Especialidad</label>
+        <input type="text" class="form-control" th:field="*{especialidad}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Horario Disponible</label>
+        <input type="text" class="form-control" th:field="*{horarioDisponible}" required>
+    </div>
+
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a th:href="@{/profesionales}" class="btn btn-secondary">Cancelar</a>
+</form>
+
+</body>
+</html>

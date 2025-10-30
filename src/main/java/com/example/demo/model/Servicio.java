@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "servicio")
@@ -13,10 +14,13 @@ public class Servicio {
     private String nombre;
     private String descripcion;
     private Double precio;
+    private Integer duracion; // en minutos
 
-    // 👉 Nuevo campo
-    private Integer duracion; // en minutos, por ejemplo
+    // 👉 AGREGAR ESTA RELACIÓN
+    @OneToMany(mappedBy = "servicio", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Cita> citas;
 
+    // Getters y setters
     public Integer getId() {
         return id;
     }
@@ -57,10 +61,18 @@ public class Servicio {
         this.duracion = duracion;
     }
 
-	@Override
-	public String toString() {
-		return "Servicio [id=" + id + ", nombre=" + nombre + ", descripcion=" + descripcion + ", precio=" + precio
-				+ ", duracion=" + duracion + "]";
-	}
-    
+    // 👉 AGREGAR GETTER Y SETTER PARA CITAS
+    public List<Cita> getCitas() {
+        return citas;
+    }
+
+    public void setCitas(List<Cita> citas) {
+        this.citas = citas;
+    }
+
+    @Override
+    public String toString() {
+        return "Servicio [id=" + id + ", nombre=" + nombre + ", descripcion=" + descripcion + ", precio=" + precio
+                + ", duracion=" + duracion + "]";
+    }
 }
