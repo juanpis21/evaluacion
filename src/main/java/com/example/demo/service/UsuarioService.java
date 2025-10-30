@@ -15,4 +15,7 @@ public interface UsuarioService {
     boolean existsByEmail(String email);
     List<Usuario> findByNombre(String nombre);
 	Optional<Usuario> get(Integer usuarioId);
+	Usuario obtenerUsuarioActual();
+	Object obtenerTodosLosUsuarios();
+	Usuario obtenerServicioPorId(Long usuarioId);
 }

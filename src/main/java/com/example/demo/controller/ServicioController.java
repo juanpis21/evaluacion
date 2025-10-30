@@ -15,16 +15,18 @@ public class ServicioController {
     @Autowired
     private ServicioService servicioService;
 
+    // Mostrar todos los servicios
     @GetMapping
-    public String listar(Model model) {
-        model.addAttribute("servicios", servicioService.findAll());
-        return "servicios";
+    public String listarServicios(Model model) {
+        model.addAttribute("servicios", servicioService.obtenerTodosLosServicios());
+        return "servicios"; // nombre del HTML Thymeleaf
     }
 
+    // Guardar o actualizar un servicio
     @PostMapping("/guardar")
-    public String guardar(@ModelAttribute Servicio servicio, RedirectAttributes redirectAttributes) {
+    public String guardarServicio(@ModelAttribute Servicio servicio, RedirectAttributes redirectAttributes) {
         try {
-            servicioService.save(servicio);
+            servicioService.guardarServicio(servicio);
             redirectAttributes.addFlashAttribute("success", "Servicio guardado correctamente.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error al guardar el servicio.");
@@ -32,10 +34,11 @@ public class ServicioController {
         return "redirect:/servicios";
     }
 
+    // Eliminar un servicio
     @GetMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    public String eliminarServicio(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
-            servicioService.delete(id);
+            servicioService.eliminarServicio(id);
             redirectAttributes.addFlashAttribute("success", "Servicio eliminado correctamente.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error al eliminar el servicio.");

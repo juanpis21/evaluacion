@@ -92,20 +92,23 @@
 <!-- 🔹 NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
     <div class="container-fluid px-4">
-        <a class="navbar-brand" href="#">Gestión de Usuarios</a>
+        <a class="navbar-brand" href="#">Gestión de Profesionales</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link active" th:href="@{/usuarios}">Usuarios</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/usuarios}">Usuarios</a></li>
+				<li class="nav-item"><a class="nav-link active" th:href="@{/profesionales}">Profesionales</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/servicios}">Servicios</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/citas}">Citas</a></li>
+				<li class="nav-item"><a class="nav-link active" th:href="@{/citas/nueva}">Agendar Cita</a></li>
+				<li class="nav-item"><a class="nav-link" th:href="@{/citas/historial}">Historial</a></li>
             </ul>
         </div>
     </div>
 </nav>
+
 
 <!-- 🔹 CONTENIDO -->
 <div class="container content-container">

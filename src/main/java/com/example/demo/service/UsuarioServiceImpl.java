@@ -81,4 +81,22 @@ public class UsuarioServiceImpl implements UsuarioService {
 		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
+
+	@Override
+	public Usuario obtenerUsuarioActual() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object obtenerTodosLosUsuarios() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Usuario obtenerServicioPorId(Long usuarioId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

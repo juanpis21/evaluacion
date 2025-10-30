@@ -1,48 +1,50 @@
 package com.example.demo.service;
 
-import com.example.demo.model.Cita;
-import com.example.demo.repository.CitaRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.model.Cita;
+import com.example.demo.repository.CitaRepository;
+
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@Primary
 public class CitaServiceImpl implements CitaService {
 
-    @Autowired
-    private CitaRepository citaRepository;
+	@Autowired
+	private CitaRepository citaRepository;
 
-    @Override
-    public List<Cita> findAll() {
-        return citaRepository.findAll();
-    }
+	@Override
+	public List<Cita> obtenerCitasPorUsuario(Integer usuarioId) {
+		System.out.println("=== DEBUG: Buscando citas para usuario ID: " + usuarioId);
+		List<Cita> citas = citaRepository.findByUsuarioId(usuarioId);
+		System.out.println("=== DEBUG: Citas encontradas: " + citas.size());
 
-    @Override
-    public Optional<Cita> get(Integer id) {
-        return citaRepository.findById(id);
-    }
+		// Debug detallado de cada cita
+		for (Cita cita : citas) {
+			System.out.println("Cita ID: " + cita.getId() + ", Estado: " + cita.getEstado() + ", Servicio: "
+					+ (cita.getServicio() != null ? cita.getServicio().getNombre() : "null") + ", Profesional: "
+					+ (cita.getProfesional() != null ? cita.getProfesional().getUsuario().getNombre() : "null"));
+		}
 
-    @Override
-    public Cita save(Cita cita) {
-        // Actualiza solo si ya existe
-        if (cita.getId() != null) {
-            Optional<Cita> existente = citaRepository.findById(cita.getId());
-            if (existente.isPresent()) {
-                Cita actual = existente.get();
-                actual.setUsuario(cita.getUsuario());
-                actual.setServicio(cita.getServicio());
-                actual.setFechaHora(cita.getFechaHora());
-                actual.setObservaciones(cita.getObservaciones());
-                return citaRepository.save(actual);
-            }
-        }
-        return citaRepository.save(cita);
-    }
+		return citas;
+	}
 
-    @Override
-    public void delete(Integer id) {
-        citaRepository.deleteById(id);
-    }
+	@Override
+	public List<Cita> obtenerTodasLasCitas() {
+		return citaRepository.findAll();
+	}
+
+	@Override
+	public Cita guardarCita(Cita cita) {
+		return citaRepository.save(cita);
+	}
+
+	@Override
+	public void eliminarCita(Integer id) {
+		citaRepository.deleteById(id);
+	}
 }

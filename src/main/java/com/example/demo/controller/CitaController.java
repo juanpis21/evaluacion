@@ -2,75 +2,99 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Cita;
 import com.example.demo.model.Usuario;
+import com.example.demo.model.Profesional;
 import com.example.demo.model.Servicio;
-import com.example.demo.service.CitaService;
-import com.example.demo.service.UsuarioService;
-import com.example.demo.service.ServicioService;
+import com.example.demo.repository.CitaRepository;
+import com.example.demo.repository.UsuarioRepository;
+import com.example.demo.repository.ProfesionalRepository;
+import com.example.demo.repository.ServicioRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
-@RequestMapping("/citas")
 public class CitaController {
 
     @Autowired
-    private CitaService citaService;
+    private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private UsuarioService usuarioService;
+    private ProfesionalRepository profesionalRepository;
 
     @Autowired
-    private ServicioService servicioService;
+    private ServicioRepository servicioRepository;
 
-    // 📄 Mostrar todas las citas en la misma página con modal
-    @GetMapping
-    public String listarCitas(Model model) {
-        List<Cita> citas = citaService.findAll();
-        List<Usuario> usuarios = usuarioService.findAll();
-        List<Servicio> servicios = servicioService.findAll();
+    @Autowired
+    private CitaRepository citaRepository;
 
-        model.addAttribute("citas", citas);
+    // Mostrar formulario de nueva cita
+    @GetMapping("/citas/nueva")
+    public String mostrarFormulario(Model model) {
+        List<Usuario> usuarios = usuarioRepository.findAll();
+        List<Profesional> profesionales = profesionalRepository.findAll();
+        List<Servicio> servicios = servicioRepository.findAll();
+
         model.addAttribute("usuarios", usuarios);
+        model.addAttribute("profesionales", profesionales);
         model.addAttribute("servicios", servicios);
-        model.addAttribute("cita", new Cita()); // objeto para el modal de nueva cita
 
-        return "citas"; // plantilla unificada con modales
+        return "nueva-cita";
     }
 
-    // 💾 Guardar o actualizar cita
-    @PostMapping("/guardar")
-    public String guardarCita(@ModelAttribute("cita") Cita cita,
-                              @RequestParam("usuarioId") Integer usuarioId,
-                              @RequestParam("servicioId") Integer servicioId,
-                              RedirectAttributes redirect) {
+    // Crear nueva cita
+    @PostMapping("/citas/nueva")
+    public String crearCita(
+            @RequestParam("usuarioId") Integer usuarioId,
+            @RequestParam("profesionalId") Integer profesionalId,
+            @RequestParam("servicioId") Integer servicioId,
+            @RequestParam("fechaHora") String fechaHora,
+            Model model
+    ) {
+        try {
+            Usuario usuario = usuarioRepository.findById(usuarioId)
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-        Optional<Usuario> usuarioOpt = usuarioService.get(usuarioId);
-        Optional<Servicio> servicioOpt = servicioService.get(servicioId);
+            Profesional profesional = profesionalRepository.findById(profesionalId)
+                    .orElseThrow(() -> new IllegalArgumentException("Profesional no encontrado"));
 
-        if (usuarioOpt.isEmpty() || servicioOpt.isEmpty()) {
-            redirect.addFlashAttribute("error", "Debe seleccionar un cliente y un servicio válidos.");
-            return "redirect:/citas";
+            Servicio servicio = servicioRepository.findById(servicioId)
+                    .orElseThrow(() -> new IllegalArgumentException("Servicio no encontrado"));
+
+            Cita cita = new Cita();
+            cita.setUsuario(usuario);
+            cita.setProfesional(profesional);
+            cita.setServicio(servicio);
+            cita.setFechaHora(LocalDateTime.parse(fechaHora));
+
+            citaRepository.save(cita);
+
+            // Redirigir al historial después de crear la cita
+            return "redirect:/citas/historial";
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Ocurrió un error al agendar la cita: " + e.getMessage());
+
+            // Re-cargar listas para el formulario
+            model.addAttribute("usuarios", usuarioRepository.findAll());
+            model.addAttribute("profesionales", profesionalRepository.findAll());
+            model.addAttribute("servicios", servicioRepository.findAll());
+
+            return "nueva-cita";
         }
-
-        cita.setUsuario(usuarioOpt.get());
-        cita.setServicio(servicioOpt.get());
-
-        citaService.save(cita);
-        redirect.addFlashAttribute("success", "Cita guardada correctamente.");
-        return "redirect:/citas";
     }
 
-    // 🗑️ Eliminar cita
-    @GetMapping("/eliminar/{id}")
-    public String eliminarCita(@PathVariable Integer id, RedirectAttributes redirect) {
-        citaService.delete(id);
-        redirect.addFlashAttribute("success", "Cita eliminada correctamente.");
-        return "redirect:/citas";
+    // Mostrar historial de citas
+    @GetMapping("/citas/historial")
+    public String mostrarHistorial(Model model) {
+        List<Cita> citas = citaRepository.findAll();
+        model.addAttribute("citas", citas);
+        return "historial"; // plantilla Thymeleaf: historial.html
     }
 }

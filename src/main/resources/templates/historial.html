@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial de Citas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #eef2f6;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .navbar {
+            background: linear-gradient(90deg, #002855, #003366);
+        }
+        .content-container {
+            margin-top: 90px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .table th {
+            background-color: #003366;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand" href="#">Gestión de Citas</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" th:href="@{/usuarios}">Usuarios</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/profesionales}">Profesionales</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/servicios}">Servicios</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/citas/nueva}">Agendar Cita</a></li>
+                <li class="nav-item"><a class="nav-link active" th:href="@{/citas/historial}">Historial</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container content-container">
+    <h3 class="mb-4">Historial de Citas</h3>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Profesional</th>
+                <th>Servicio</th>
+                <th>Fecha y Hora</th>
+            </tr>
+        </thead>
+		<tbody>
+		    <tr th:each="cita : ${citas}">
+		        <td th:text="${cita.id}">1</td>
+		        <td th:text="${cita.usuario.nombre}">Nombre Usuario</td>
+		        <td th:text="${cita.profesional.especialidad}">Especialidad</td>
+		        <td th:text="${cita.servicio.nombre}">Servicio</td>
+		        <td th:text="${#temporals.format(cita.fechaHora, 'yyyy-MM-dd HH:mm')}">2025-10-30 14:00</td>
+		    </tr>
+		</tbody>
+
+    </table>
+
+    <a th:href="@{/citas/nueva}" class="btn btn-warning">Agendar Nueva Cita</a>
+</div>
+
+</body>
+</html>
