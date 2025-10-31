@@ -10,17 +10,7 @@ import java.util.List;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
-   
-    
     Optional<Usuario> findByEmail(String email);
-    
-    /**
-     * Verificar si existe un usuario con el email dado
-     */
     boolean existsByEmail(String email);
-    
-    /**
-     * Buscar usuarios por nombre (búsqueda parcial, insensible a mayúsculas)
-     */
     List<Usuario> findByNombreContainingIgnoreCase(String nombre);
 }

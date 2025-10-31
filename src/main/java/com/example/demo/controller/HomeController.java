@@ -5,8 +5,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class HomeController {
+
+    // Redirige la raíz ("/") al login
     @GetMapping("/")
     public String index() {
-        return "redirect:/usuarios";
+        return "redirect:/auth/login";
     }
 }

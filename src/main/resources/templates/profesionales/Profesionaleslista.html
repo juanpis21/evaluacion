@@ -8,82 +8,171 @@
 
     <style>
         body {
-            background-color: #eef2f6;
-            font-family: 'Segoe UI', sans-serif;
+            background-color: #1c1c1c;
+            font-family: 'Georgia', serif;
+            color: #f0f0f0;
+            margin: 0;
+            min-height: 100vh;
         }
 
-        /* 🔹 Navbar azul oscuro */
+        /* 🔹 Navbar oscuro elegante */
         .navbar {
-            background: linear-gradient(90deg, #001f3f, #003366);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            background: linear-gradient(90deg, #0d0d0d, #1a1a1a);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.7);
         }
 
         .navbar-brand {
-            color: #ffffff !important;
+            color: #e0c097 !important;
             font-weight: 600;
             letter-spacing: 0.5px;
         }
 
         .navbar-nav .nav-link {
-            color: rgba(255, 255, 255, 0.85);
+            color: rgba(224, 192, 151, 0.85);
             transition: all 0.2s;
         }
 
-        .navbar-nav .nav-link:hover {
-            color: #fff;
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.active {
+            color: #e0c097;
             transform: scale(1.05);
         }
 
         /* 🔹 Contenedor */
         .content-container {
             margin-top: 70px;
-            background: #fff;
+            background: #2c2c2c;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.7);
         }
 
+        h3 {
+            color: #e0c097;
+        }
+
+        /* Ajustes generales de tabla */
+        .table {
+            color: #f0f0f0;
+        }
+
+        .table-dark th {
+            background-color: #3a3a3a;
+            color: #e0c097;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #444;
+        }
+
+        /* Botones */
         .btn-primary {
-            background-color: #003366;
+            background-color: #e0c097;
+            color: #1c1c1c;
             border: none;
-            transition: background 0.2s ease;
         }
 
         .btn-primary:hover {
-            background-color: #00264d;
+            background-color: #c9a87a;
         }
 
         .btn-warning {
-            background-color: #ffc107;
-            color: #212529;
+            background-color: #555;
+            color: #e0c097;
             border: none;
         }
 
         .btn-warning:hover {
-            background-color: #e0a800;
+            background-color: #666;
         }
 
         .btn-danger {
-            background-color: #dc3545;
+            background-color: #b22222;
             border: none;
+            color: #f0f0f0;
         }
 
         .btn-danger:hover {
-            background-color: #bb2d3b;
+            background-color: #801818;
+        }
+
+        /* Modales */
+        .modal-content {
+            background-color: #2c2c2c;
+            color: #e0c097;
         }
 
         .modal-header {
-            background-color: #003366;
-            color: white;
+            background-color: #3a3a3a;
+            color: #e0c097;
         }
 
-        .table-hover tbody tr:hover {
-            background-color: #f1f5ff;
-            transition: 0.2s;
+        .modal-footer .btn-secondary {
+            background-color: #555;
+            color: #e0c097;
         }
 
-        .alert {
-            border-radius: 8px;
+        .modal-footer .btn-secondary:hover {
+            background-color: #666;
+        }
+
+        /* Formularios */
+        .form-control {
+            background-color: #3a3a3a;
+            color: #e0c097;
+            border: 1px solid #555;
+            border-radius: 6px;
+        }
+
+        .form-control:focus {
+            border-color: #e0c097;
+            box-shadow: none;
+            background-color: #3a3a3a;
+            color: #e0c097;
+        }
+
+        /* Alertas */
+        .alert-success {
+            background-color: #2c2c2c;
+            color: #c9a87a;
+            border-color: #444;
+        }
+
+        .alert-danger {
+            background-color: #2c2c2c;
+            color: #e07a7a;
+            border-color: #444;
+        }
+
+        /* Tabla personalizada con fondo oscuro */
+        .table-dark-custom {
+            color: #e0c097; /* texto dorado */
+        }
+
+        .table-dark-custom thead th {
+            background-color: #1a1a1a; /* encabezado más oscuro */
+            color: #e0c097;
+            border-color: #444;
+        }
+
+        /* Sobrescribe el rayado de Bootstrap */
+        .table-dark-custom tbody tr:nth-of-type(odd) {
+            background-color: #2c2c2c; /* fondo oscuro */
+        }
+
+        .table-dark-custom tbody tr:nth-of-type(even) {
+            background-color: #323232; /* un poco diferente para rayado */
+        }
+
+        .table-dark-custom tbody tr:hover {
+            background-color: #3a3a3a !important; /* hover destacado */
+        }
+
+        /* Celdas heredan el fondo de la fila */
+        .table-dark-custom tbody td {
+            background-color: inherit;
+            color: #e0c097;
+            border-color: #444;
         }
     </style>
 </head>
@@ -104,6 +193,7 @@
                 <li class="nav-item"><a class="nav-link" th:href="@{/servicios}">Servicios</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/citas/nueva}">Agendar Cita</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/citas/historial}">Historial</a></li>
+				<li class="nav-item"><a class="nav-link" th:href="@{/auth/logout}">Cerrar Sesión</a></li>
             </ul>
         </div>
     </div>
@@ -115,12 +205,13 @@
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="text-dark">Lista de Profesionales</h3>
+        <h3>Lista de Profesionales</h3>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#profesionalModal" onclick="limpiarFormulario()">+ Nuevo Profesional</button>
     </div>
 
-    <table class="table table-hover table-striped align-middle">
-        <thead class="table-dark">
+    <!-- Aquí agregué la clase table-dark-custom -->
+    <table class="table table-hover table-striped align-middle table-dark-custom">
+        <thead>
             <tr>
                 <th>ID</th>
                 <th>Especialidad</th>
