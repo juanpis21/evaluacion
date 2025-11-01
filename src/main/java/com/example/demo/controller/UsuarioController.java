@@ -2,6 +2,9 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Usuario;
 import com.example.demo.service.UsuarioService;
+
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,9 +20,12 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
-    // Listar usuarios
     @GetMapping
-    public String listarUsuarios(Model model, @RequestParam(value = "q", required = false) String query) {
+    public String listarUsuarios(Model model,@RequestParam(value = "q", required = false) String query,HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
+        if (usuario == null) {
+            return "redirect:/auth/login";
+        }
         List<Usuario> usuarios;
         if (query != null && !query.isEmpty()) {
             usuarios = usuarioService.findByNombre(query);
@@ -30,8 +36,6 @@ public class UsuarioController {
         model.addAttribute("query", query);
         return "usuarios";
     }
-
-    // Guardar o actualizar usuario
     @PostMapping("/guardar")
     public String guardarUsuario(@ModelAttribute Usuario usuario, RedirectAttributes redirectAttrs) {
         try {
@@ -41,25 +45,21 @@ public class UsuarioController {
                     redirectAttrs.addFlashAttribute("error", "El email ya está registrado");
                     return "redirect:/usuarios";
                 }
-                // Tomar contraseña del campo nuevaPassword
-                if (usuario.getNuevaPassword() != null && !usuario.getNuevaPassword().isEmpty()) {
-                    usuario.setPassword(usuario.getNuevaPassword());
-                }
-                usuarioService.save(usuario);
-                redirectAttrs.addFlashAttribute("success", "Usuario creado correctamente");
             } else {
-                // Actualizar usuario existente
-                usuarioService.update(usuario);
-                redirectAttrs.addFlashAttribute("success", "Usuario actualizado correctamente");
+                usuarioService.findById(usuario.getId()).ifPresent(existing -> {
+                    if (!existing.getEmail().equals(usuario.getEmail()) &&
+                        usuarioService.existsByEmail(usuario.getEmail())) {
+                        throw new RuntimeException("El email ya está registrado");
+                    }
+                });
             }
+            usuarioService.save(usuario);
+            redirectAttrs.addFlashAttribute("success", "Usuario guardado correctamente");
         } catch (Exception e) {
-            e.printStackTrace();
-            redirectAttrs.addFlashAttribute("error", "Error al guardar el usuario");
+            redirectAttrs.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/usuarios";
     }
-
-    // Eliminar usuario
     @GetMapping("/eliminar/{id}")
     public String eliminarUsuario(@PathVariable Integer id, RedirectAttributes redirectAttrs) {
         if (usuarioService.findById(id).isPresent()) {

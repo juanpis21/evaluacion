@@ -3,6 +3,8 @@ package com.example.demo.service;
 import com.example.demo.model.Usuario;
 import com.example.demo.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,35 +17,41 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     @Override
     public Usuario save(Usuario usuario) {
-        // Si es nuevo usuario, asignamos fecha y contraseña
         if (usuario.getId() == null) {
+            // Nuevo usuario
             usuario.setFechaRegistro(LocalDateTime.now());
-            // Transferir nuevaPassword a password
+
             if (usuario.getNuevaPassword() != null && !usuario.getNuevaPassword().isEmpty()) {
-                usuario.setPassword(usuario.getNuevaPassword());
+                usuario.setPassword(passwordEncoder.encode(usuario.getNuevaPassword()));
             }
         } else {
-            // Si es actualización, solo cambiar contraseña si se llenó nuevaPassword
+            // Actualización
             Optional<Usuario> opt = usuarioRepository.findById(usuario.getId());
             if (opt.isPresent()) {
                 Usuario existing = opt.get();
+
                 if (usuario.getNuevaPassword() != null && !usuario.getNuevaPassword().isEmpty()) {
-                    existing.setPassword(usuario.getNuevaPassword());
+                    existing.setPassword(passwordEncoder.encode(usuario.getNuevaPassword()));
                 }
+
                 existing.setNombre(usuario.getNombre());
                 existing.setEmail(usuario.getEmail());
                 existing.setTelefono(usuario.getTelefono());
+
                 return usuarioRepository.save(existing);
             }
         }
+
         return usuarioRepository.save(usuario);
     }
 
     @Override
-    public void update(Usuario usuario) {
-        save(usuario); // Reutilizamos save para actualizar
+    public Usuario update(Usuario usuario) {
+        return save(usuario); // reutiliza lógica de save
     }
 
     @Override
@@ -76,27 +84,13 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioRepository.findByNombreContainingIgnoreCase(nombre);
     }
 
-	@Override
-	public Optional<Usuario> get(Integer usuarioId) {
-		// TODO Auto-generated method stub
-		return Optional.empty();
-	}
-
-	@Override
-	public Usuario obtenerUsuarioActual() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Object obtenerTodosLosUsuarios() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Usuario obtenerServicioPorId(Long usuarioId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Usuario obtenerUsuarioActual() {
+        try {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            return usuarioRepository.findByEmail(email).orElse(null);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

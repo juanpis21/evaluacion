@@ -1,16 +1,22 @@
 package com.example.demo.service;
 
+
 import com.example.demo.model.Servicio;
 import com.example.demo.repository.ServicioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.demo.service.ServicioService;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ServicioServiceImpl implements ServicioService {
 
-    @Autowired
-    private ServicioRepository servicioRepository;
+    private final ServicioRepository servicioRepository;
+
+    public ServicioServiceImpl(ServicioRepository servicioRepository) {
+        this.servicioRepository = servicioRepository;
+    }
 
     @Override
     public List<Servicio> obtenerTodosLosServicios() {
@@ -19,7 +25,8 @@ public class ServicioServiceImpl implements ServicioService {
 
     @Override
     public Servicio obtenerServicioPorId(Integer id) {
-        return servicioRepository.findById(id).orElse(null);
+        Optional<Servicio> servicio = servicioRepository.findById(id);
+        return servicio.orElse(null);
     }
 
     @Override
@@ -31,22 +38,4 @@ public class ServicioServiceImpl implements ServicioService {
     public void eliminarServicio(Integer id) {
         servicioRepository.deleteById(id);
     }
-
-	@Override
-	public Object findAll() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void save(Servicio servicio) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void delete(Integer id) {
-		// TODO Auto-generated method stub
-		
-	}
 }

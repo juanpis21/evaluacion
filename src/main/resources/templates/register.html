@@ -93,10 +93,11 @@
 <div class="container">
     <h2>Registro Funeraria</h2>
 
+    <!-- Importante: usa nuevaPassword, no password -->
     <form th:action="@{/auth/register}" th:object="${usuario}" method="post">
         <input type="text" th:field="*{nombre}" placeholder="Nombre completo" required />
         <input type="email" th:field="*{email}" placeholder="Correo electrónico" required />
-        <input type="password" th:field="*{password}" placeholder="Contraseña" required />
+		<input type="password" th:field="*{nuevaPassword}" placeholder="Contraseña" required />
         <input type="text" th:field="*{telefono}" placeholder="Teléfono" />
         <button type="submit">Registrar</button>
     </form>

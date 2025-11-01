@@ -8,7 +8,5 @@ public interface ServicioService {
     Servicio obtenerServicioPorId(Integer id);
     void guardarServicio(Servicio servicio);
     void eliminarServicio(Integer id);
-	Object findAll();
-	void save(Servicio servicio);
-	void delete(Integer id);
+
 }

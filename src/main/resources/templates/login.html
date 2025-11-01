@@ -30,6 +30,12 @@
             color: #e0c097; /* color dorado suave */
         }
 
+        .logo {
+            width: 100px; /* ajusta tamaño */
+            height: auto;
+            margin-bottom: 15px;
+        }
+
         input {
             width: 100%;
             margin: 10px 0;
@@ -86,16 +92,19 @@
 </head>
 <body>
 <div class="container">
+
     <h2>Acceso Funeraria</h2>
 
-    <form th:action="@{/auth/login}" method="post">
-        <input type="email" name="email" placeholder="Correo electrónico" required />
-        <input type="password" name="password" placeholder="Contraseña" required />
-        <button type="submit">Ingresar</button>
-    </form>
+	<form th:action="@{/auth/login}" method="post">
+	    <input type="email" name="email" placeholder="Correo electrónico" required />
+	    <input type="password" name="password" placeholder="Contraseña" required />
+	    <button type="submit">Ingresar</button>
+	</form>
+
 
     <p th:if="${error}" th:text="${error}" class="error"></p>
-    <p>¿No tienes cuenta? <a th:href="@{/auth/register}">Regístrate</a></p>
+	<p>¿No tienes cuenta? <a th:href="@{/auth/register}">Regístrate</a></p>
+
 </div>
 </body>
 </html>

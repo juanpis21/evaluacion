@@ -1,21 +1,34 @@
 package com.example.demo.service;
 
+import com.example.demo.model.Usuario;
+
 import java.util.List;
 import java.util.Optional;
 
-import com.example.demo.model.Usuario;
-
 public interface UsuarioService {
     Usuario save(Usuario usuario);
-    void update(Usuario usuario);
+
+    // Actualizar usuario existente
+    Usuario update(Usuario usuario);
+
+    // Eliminar usuario por ID
     void delete(Integer id);
+
+    // Buscar usuario por ID
     Optional<Usuario> findById(Integer id);
-    List<Usuario> findAll();
+
+    // Buscar usuario por email
     Optional<Usuario> findByEmail(String email);
-    boolean existsByEmail(String email);
+
+    // Listar todos los usuarios
+    List<Usuario> findAll();
+
+    // Buscar usuarios por nombre (contiene, case insensitive)
     List<Usuario> findByNombre(String nombre);
-	Optional<Usuario> get(Integer usuarioId);
-	Usuario obtenerUsuarioActual();
-	Object obtenerTodosLosUsuarios();
-	Usuario obtenerServicioPorId(Long usuarioId);
+
+    // Verificar si un email ya existe
+    boolean existsByEmail(String email);
+
+    // Obtener el usuario actual logueado (según Spring Security)
+    Usuario obtenerUsuarioActual();
 }
