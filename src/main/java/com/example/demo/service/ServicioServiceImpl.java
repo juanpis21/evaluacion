@@ -1,9 +1,7 @@
 package com.example.demo.service;
 
-
 import com.example.demo.model.Servicio;
 import com.example.demo.repository.ServicioRepository;
-import com.example.demo.service.ServicioService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,25 +15,20 @@ public class ServicioServiceImpl implements ServicioService {
     public ServicioServiceImpl(ServicioRepository servicioRepository) {
         this.servicioRepository = servicioRepository;
     }
-
     @Override
-    public List<Servicio> obtenerTodosLosServicios() {
+    public List<Servicio> findAll() {
         return servicioRepository.findAll();
     }
-
     @Override
-    public Servicio obtenerServicioPorId(Integer id) {
-        Optional<Servicio> servicio = servicioRepository.findById(id);
-        return servicio.orElse(null);
+    public Optional<Servicio> findById(Integer id) {
+        return servicioRepository.findById(id);
     }
-
     @Override
-    public void guardarServicio(Servicio servicio) {
-        servicioRepository.save(servicio);
+    public Servicio save(Servicio servicio) {
+        return servicioRepository.save(servicio);
     }
-
     @Override
-    public void eliminarServicio(Integer id) {
+    public void delete(Integer id) {
         servicioRepository.deleteById(id);
     }
 }

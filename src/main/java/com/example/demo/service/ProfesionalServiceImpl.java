@@ -1,10 +1,12 @@
 package com.example.demo.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.example.demo.model.Profesional;
 import com.example.demo.repository.ProfesionalRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProfesionalServiceImpl implements ProfesionalService {
@@ -29,6 +31,27 @@ public class ProfesionalServiceImpl implements ProfesionalService {
 
     @Override
     public void eliminarProfesional(Integer id) {
+        profesionalRepository.deleteById(id);
+    }
+
+
+    @Override
+    public List<Profesional> findAll() {
+        return profesionalRepository.findAll();
+    }
+
+    @Override
+    public Optional<Profesional> findById(Integer id) {
+        return profesionalRepository.findById(id);
+    }
+
+    @Override
+    public Profesional save(Profesional profesional) {
+        return profesionalRepository.save(profesional);
+    }
+
+    @Override
+    public void delete(Integer id) {
         profesionalRepository.deleteById(id);
     }
 

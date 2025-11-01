@@ -33,8 +33,7 @@ public class CitaController {
 
     @Autowired
     private CitaRepository citaRepository;
-
-    // Mostrar formulario de nueva cita
+    
     @GetMapping("/citas/nueva")
     public String mostrarFormulario(Model model) {
         List<Usuario> usuarios = usuarioRepository.findAll();
@@ -47,13 +46,8 @@ public class CitaController {
 
         return "nueva-cita";
     }
-
-    // Crear nueva cita
     @PostMapping("/citas/nueva")
-    public String crearCita(
-            @RequestParam("usuarioId") Integer usuarioId,
-            @RequestParam("profesionalId") Integer profesionalId,
-            @RequestParam("servicioId") Integer servicioId,
+    public String crearCita( @RequestParam("usuarioId") Integer usuarioId,@RequestParam("profesionalId") Integer profesionalId,@RequestParam("servicioId") Integer servicioId,
             @RequestParam("fechaHora") String fechaHora,
             Model model
     ) {
@@ -72,29 +66,21 @@ public class CitaController {
             cita.setProfesional(profesional);
             cita.setServicio(servicio);
             cita.setFechaHora(LocalDateTime.parse(fechaHora));
-
             citaRepository.save(cita);
-
-            // Redirigir al historial después de crear la cita
             return "redirect:/citas/historial";
 
         } catch (Exception e) {
             model.addAttribute("error", "Ocurrió un error al agendar la cita: " + e.getMessage());
-
-            // Re-cargar listas para el formulario
             model.addAttribute("usuarios", usuarioRepository.findAll());
             model.addAttribute("profesionales", profesionalRepository.findAll());
             model.addAttribute("servicios", servicioRepository.findAll());
-
             return "nueva-cita";
         }
     }
-
-    // Mostrar historial de citas
     @GetMapping("/citas/historial")
     public String mostrarHistorial(Model model) {
         List<Cita> citas = citaRepository.findAll();
         model.addAttribute("citas", citas);
-        return "historial"; // plantilla Thymeleaf: historial.html
+        return "historial";
     }
 }

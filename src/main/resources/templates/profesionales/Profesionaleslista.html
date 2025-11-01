@@ -15,7 +15,6 @@
             min-height: 100vh;
         }
 
-        /* 🔹 Navbar oscuro elegante */
         .navbar {
             background: linear-gradient(90deg, #0d0d0d, #1a1a1a);
             box-shadow: 0 4px 12px rgba(0,0,0,0.7);
@@ -38,7 +37,6 @@
             transform: scale(1.05);
         }
 
-        /* 🔹 Contenedor */
         .content-container {
             margin-top: 70px;
             background: #2c2c2c;
@@ -51,7 +49,6 @@
             color: #e0c097;
         }
 
-        /* Ajustes generales de tabla */
         .table {
             color: #f0f0f0;
         }
@@ -65,7 +62,6 @@
             background-color: #444;
         }
 
-        /* Botones */
         .btn-primary {
             background-color: #e0c097;
             color: #1c1c1c;
@@ -96,7 +92,6 @@
             background-color: #801818;
         }
 
-        /* Modales */
         .modal-content {
             background-color: #2c2c2c;
             color: #e0c097;
@@ -116,7 +111,6 @@
             background-color: #666;
         }
 
-        /* Formularios */
         .form-control {
             background-color: #3a3a3a;
             color: #e0c097;
@@ -131,44 +125,28 @@
             color: #e0c097;
         }
 
-        /* Alertas */
-        .alert-success {
-            background-color: #2c2c2c;
-            color: #c9a87a;
-            border-color: #444;
-        }
-
-        .alert-danger {
-            background-color: #2c2c2c;
-            color: #e07a7a;
-            border-color: #444;
-        }
-
-        /* Tabla personalizada con fondo oscuro */
         .table-dark-custom {
-            color: #e0c097; /* texto dorado */
+            color: #e0c097;
         }
 
         .table-dark-custom thead th {
-            background-color: #1a1a1a; /* encabezado más oscuro */
+            background-color: #1a1a1a;
             color: #e0c097;
             border-color: #444;
         }
 
-        /* Sobrescribe el rayado de Bootstrap */
         .table-dark-custom tbody tr:nth-of-type(odd) {
-            background-color: #2c2c2c; /* fondo oscuro */
+            background-color: #2c2c2c;
         }
 
         .table-dark-custom tbody tr:nth-of-type(even) {
-            background-color: #323232; /* un poco diferente para rayado */
+            background-color: #323232;
         }
 
         .table-dark-custom tbody tr:hover {
-            background-color: #3a3a3a !important; /* hover destacado */
+            background-color: #3a3a3a !important;
         }
 
-        /* Celdas heredan el fondo de la fila */
         .table-dark-custom tbody td {
             background-color: inherit;
             color: #e0c097;
@@ -178,27 +156,24 @@
 </head>
 <body>
 
-	<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-	    <div class="container-fluid px-4">
-	        <a class="navbar-brand" href="#">Funeraria Elegante</a>
-	        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-	            <span class="navbar-toggler-icon"></span>
-	        </button>
-	        <div class="collapse navbar-collapse" id="navbarNav">
-	            <ul class="navbar-nav ms-auto">
-	                <li class="nav-item"><a class="nav-link" th:href="@{/home}">Home</a></li> <!-- <- Agregado -->
-	                <li class="nav-item"><a class="nav-link active" th:href="@{/usuarios}">Usuarios</a></li>
-	                <li class="nav-item"><a class="nav-link" th:href="@{/profesionales}">Profesionales</a></li>
-	                <li class="nav-item"><a class="nav-link" th:href="@{/servicios}">Servicios</a></li>
-	                <li class="nav-item"><a class="nav-link" th:href="@{/citas/nueva}">Agendar Cita</a></li>
-	                <li class="nav-item"><a class="nav-link" th:href="@{/citas/historial}">Historial</a></li>
-	            </ul>
-	        </div>
-	    </div>
-	</nav>
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand" href="#">Funeraria Elegante</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" th:href="@{/usuarios}">Usuarios</a></li>
+                <li class="nav-item"><a class="nav-link active" th:href="@{/profesionales}">Profesionales</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/servicios}">Servicios</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/citas/nueva}">Agendar Cita</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/citas/historial}">Historial</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
 
-
-<!-- 🔹 CONTENIDO -->
 <div class="container content-container">
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
@@ -208,11 +183,13 @@
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#profesionalModal" onclick="limpiarFormulario()">+ Nuevo Profesional</button>
     </div>
 
-    <!-- Aquí agregué la clase table-dark-custom -->
     <table class="table table-hover table-striped align-middle table-dark-custom">
         <thead>
             <tr>
                 <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
                 <th>Especialidad</th>
                 <th>Horario Disponible</th>
                 <th class="text-center">Acciones</th>
@@ -221,12 +198,18 @@
         <tbody>
             <tr th:each="p : ${profesionales}">
                 <td th:text="${p.id}"></td>
+                <td th:text="${p.nombre}"></td>
+                <td th:text="${p.email}"></td>
+                <td th:text="${p.telefono}"></td>
                 <td th:text="${p.especialidad}"></td>
                 <td th:text="${p.horarioDisponible}"></td>
                 <td class="text-center">
                     <button class="btn btn-warning btn-sm"
                             data-bs-toggle="modal" data-bs-target="#profesionalModal"
                             th:data-id="${p.id}"
+                            th:data-nombre="${p.nombre}"
+                            th:data-email="${p.email}"
+                            th:data-telefono="${p.telefono}"
                             th:data-especialidad="${p.especialidad}"
                             th:data-horario="${p.horarioDisponible}"
                             onclick="editarProfesionalModal(this)">Editar</button>
@@ -248,15 +231,33 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="id" name="id"/>
+
+                <div class="mb-3">
+                    <label>Nombre</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required/>
+                </div>
+
+                <div class="mb-3">
+                    <label>Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required/>
+                </div>
+
+                <div class="mb-3">
+                    <label>Teléfono</label>
+                    <input type="text" class="form-control" id="telefono" name="telefono" required/>
+                </div>
+
                 <div class="mb-3">
                     <label>Especialidad</label>
                     <input type="text" class="form-control" id="especialidad" name="especialidad" required/>
                 </div>
+
                 <div class="mb-3">
                     <label>Horario Disponible</label>
                     <input type="text" class="form-control" id="horarioDisponible" name="horarioDisponible" required/>
                 </div>
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Guardar</button>
@@ -265,11 +266,13 @@
     </div>
 </div>
 
-<!-- 🔹 JS FUNCIONES -->
 <script>
     function editarProfesionalModal(btn) {
         document.getElementById('modalTitle').innerText = 'Editar Profesional';
         document.getElementById('id').value = btn.getAttribute('data-id');
+        document.getElementById('nombre').value = btn.getAttribute('data-nombre');
+        document.getElementById('email').value = btn.getAttribute('data-email');
+        document.getElementById('telefono').value = btn.getAttribute('data-telefono');
         document.getElementById('especialidad').value = btn.getAttribute('data-especialidad');
         document.getElementById('horarioDisponible').value = btn.getAttribute('data-horario');
     }
@@ -277,6 +280,9 @@
     function limpiarFormulario() {
         document.getElementById('modalTitle').innerText = 'Nuevo Profesional';
         document.getElementById('id').value = '';
+        document.getElementById('nombre').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('telefono').value = '';
         document.getElementById('especialidad').value = '';
         document.getElementById('horarioDisponible').value = '';
     }

@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -14,13 +15,22 @@ public class Servicio {
     private String nombre;
     private String descripcion;
     private Double precio;
-    private Integer duracion; // en minutos
+    private Integer duracion; 
 
-    // 👉 AGREGAR ESTA RELACIÓN
+
     @OneToMany(mappedBy = "servicio", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore 
     private List<Cita> citas;
 
-    // Getters y setters
+    public Servicio() {}
+
+    public Servicio(String nombre, String descripcion, Double precio, Integer duracion) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.precio = precio;
+        this.duracion = duracion;
+    }
+
     public Integer getId() {
         return id;
     }
@@ -61,7 +71,6 @@ public class Servicio {
         this.duracion = duracion;
     }
 
-    // 👉 AGREGAR GETTER Y SETTER PARA CITAS
     public List<Cita> getCitas() {
         return citas;
     }
@@ -69,10 +78,14 @@ public class Servicio {
     public void setCitas(List<Cita> citas) {
         this.citas = citas;
     }
-
     @Override
     public String toString() {
-        return "Servicio [id=" + id + ", nombre=" + nombre + ", descripcion=" + descripcion + ", precio=" + precio
-                + ", duracion=" + duracion + "]";
+        return "Servicio{" +
+                "id=" + id +
+                ", nombre='" + nombre + '\'' +
+                ", descripcion='" + descripcion + '\'' +
+                ", precio=" + precio +
+                ", duracion=" + duracion +
+                '}';
     }
 }

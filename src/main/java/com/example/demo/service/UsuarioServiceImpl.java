@@ -13,23 +13,18 @@ import java.util.Optional;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
-
     @Autowired
     private UsuarioRepository usuarioRepository;
-
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
     @Override
     public Usuario save(Usuario usuario) {
         if (usuario.getId() == null) {
-            // Nuevo usuario
             usuario.setFechaRegistro(LocalDateTime.now());
 
             if (usuario.getNuevaPassword() != null && !usuario.getNuevaPassword().isEmpty()) {
                 usuario.setPassword(passwordEncoder.encode(usuario.getNuevaPassword()));
             }
         } else {
-            // Actualización
             Optional<Usuario> opt = usuarioRepository.findById(usuario.getId());
             if (opt.isPresent()) {
                 Usuario existing = opt.get();
@@ -37,21 +32,18 @@ public class UsuarioServiceImpl implements UsuarioService {
                 if (usuario.getNuevaPassword() != null && !usuario.getNuevaPassword().isEmpty()) {
                     existing.setPassword(passwordEncoder.encode(usuario.getNuevaPassword()));
                 }
-
                 existing.setNombre(usuario.getNombre());
                 existing.setEmail(usuario.getEmail());
                 existing.setTelefono(usuario.getTelefono());
-
                 return usuarioRepository.save(existing);
             }
         }
-
         return usuarioRepository.save(usuario);
     }
 
     @Override
     public Usuario update(Usuario usuario) {
-        return save(usuario); // reutiliza lógica de save
+        return save(usuario);
     }
 
     @Override

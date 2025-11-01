@@ -16,30 +16,24 @@ public class ProfesionalController {
 
     @Autowired
     private ProfesionalService profesionalService;
-
-    // 🟢 LISTAR PROFESIONALES
     @GetMapping("")
     public String listarProfesionales(Model model) {
         List<Profesional> profesionales = profesionalService.obtenerTodosLosProfesionales();
         model.addAttribute("profesionales", profesionales);
-        return "profesionales/Profesionaleslista"; // Asegúrate de tener esta vista en templates/profesionales/
+        return "profesionales/Profesionaleslista"; 
     }
 
-    // 🟢 FORMULARIO NUEVO PROFESIONAL
     @GetMapping("/nuevo")
     public String mostrarFormularioNuevo(Model model) {
         model.addAttribute("profesional", new Profesional());
-        return "profesionales/Profesionalesformulario"; // Vista para crear/editar
+        return "profesionales/Profesionalesformulario"; 
     }
 
-    // 🟢 GUARDAR PROFESIONAL (NUEVO o EDITADO)
     @PostMapping("/guardar")
     public String guardarProfesional(@ModelAttribute Profesional profesional) {
         profesionalService.guardarProfesional(profesional);
         return "redirect:/profesionales";
     }
-
-    // 🟢 EDITAR PROFESIONAL
     @GetMapping("/editar/{id}")
     public String editarProfesional(@PathVariable Integer id, Model model) {
         Profesional profesional = profesionalService.obtenerProfesionalPorId(id);
@@ -50,7 +44,6 @@ public class ProfesionalController {
         return "profesionales/Profesionalesformulario";
     }
 
-    // 🔴 ELIMINAR PROFESIONAL
     @GetMapping("/eliminar/{id}")
     public String eliminarProfesional(@PathVariable Integer id) {
         profesionalService.eliminarProfesional(id);

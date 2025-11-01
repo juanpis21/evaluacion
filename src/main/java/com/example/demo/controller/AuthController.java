@@ -20,49 +20,35 @@ public class AuthController {
     private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    private HttpSession session; // para guardar el usuario logueado
+    private HttpSession session; 
 
-    // Mostrar login
     @GetMapping("/login")
     public String mostrarLogin() {
         return "login";
     }
 
-    // Procesar login manualmente
     @PostMapping("/login")
-    public String procesarLogin(@RequestParam String email,
-                                @RequestParam String password,
-                                Model model) {
-
+    public String procesarLogin(@RequestParam String email,@RequestParam String password,Model model) {
         Usuario usuario = usuarioService.findByEmail(email).orElse(null);
-
         if (usuario == null) {
             model.addAttribute("error", "El usuario no existe");
             return "login";
         }
-
         if (!passwordEncoder.matches(password, usuario.getPassword())) {
             model.addAttribute("error", "Contraseña incorrecta");
             return "login";
         }
-
-        // ✅ Guarda el usuario en sesión
         session.setAttribute("usuarioLogueado", usuario);
 
         return "redirect:/usuarios";
     }
-
-    // Mostrar formulario de registro
     @GetMapping("/register")
     public String mostrarRegistro(Model model) {
         model.addAttribute("usuario", new Usuario());
         return "register";
     }
-
-    // Procesar registro
     @PostMapping("/register")
-    public String procesarRegistro(@ModelAttribute("usuario") Usuario usuario,
-                                   Model model) {
+    public String procesarRegistro(@ModelAttribute("usuario") Usuario usuario, Model model) {
         try {
             usuarioService.save(usuario);
             model.addAttribute("mensaje", "Usuario registrado correctamente. Inicia sesión.");
@@ -74,7 +60,6 @@ public class AuthController {
         }
     }
 
-    // Cerrar sesión
     @GetMapping("/logout")
     public String cerrarSesion() {
         session.invalidate();
