@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login - Funeraria</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background: #1c1c1c; /* fondo oscuro sobrio */
+            color: #f0f0f0;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 320px;
+            padding: 30px;
+            background: #2c2c2c; /* gris oscuro */
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-weight: normal;
+            color: #e0c097; /* color dorado suave */
+        }
+
+        .logo {
+            width: 100px; /* ajusta tamaño */
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input[type="email"], input[type="password"] {
+            background: #3a3a3a;
+            color: #f0f0f0;
+        }
+
+        input::placeholder {
+            color: #bbb;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #e0c097; /* dorado suave */
+            color: #1c1c1c;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #c9a87a;
+        }
+
+        .error {
+            color: #ff6b6b;
+            margin-top: 10px;
+        }
+
+        a {
+            color: #e0c097;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        p {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h2>Acceso Funeraria</h2>
+
+	<form th:action="@{/auth/login}" method="post">
+	    <input type="email" name="email" placeholder="Correo electrónico" required />
+	    <input type="password" name="password" placeholder="Contraseña" required />
+	    <button type="submit">Ingresar</button>
+	</form>
+
+
+    <p th:if="${error}" th:text="${error}" class="error"></p>
+	<p>¿No tienes cuenta? <a th:href="@{/auth/register}">Regístrate</a></p>
+
+</div>
+</body>
+</html>
