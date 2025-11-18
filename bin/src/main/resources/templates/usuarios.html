@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Usuarios - Funeraria</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #1c1c1c;
+            color: #f0f0f0;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        /* Navbar estilo funeraria xd*/
+        .navbar {
+            background: linear-gradient(90deg, #000000, #2c2c2c);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .navbar-brand, .nav-link {
+            color: #e0c097 !important;
+        }
+
+        .nav-link:hover {
+            color: #f0e0c0 !important;
+            transform: scale(1.05);
+        }
+
+        /* Contenedor */
+        .content-container {
+            margin-top: 100px;
+            background-color: #2c2c2c;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        h3 {
+            color: #e0c097;
+        }
+
+        /* Cambiar fondo de la tabla y celdas para que coincida con la tarjeta */
+        .table-dark-custom {
+            background-color: #2c2c2c; /* mismo color que .content-container */
+            color: #e0c097; /* texto dorado */
+        }
+
+        .table-dark-custom thead th {
+            background-color: #1a1a1a; /* un poco más oscuro para el encabezado */
+            color: #e0c097;
+            border-color: #444;
+        }
+
+        .table-dark-custom tbody td {
+            background-color: #2c2c2c;
+            color: #e0c097;
+            border-color: #444;
+        }
+
+        .table-dark-custom tbody tr:hover {
+            background-color: #3a3a3a; /* hover suave */
+        }
+
+        /* Botones */
+        .btn-primary {
+            background-color: #e0c097;
+            color: #1c1c1c;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #c9a87a;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            color: #1c1c1c;
+            border: none;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* MODAL - estilos personalizados para que sea oscuro y elegante */
+        .modal-content {
+            background-color: #2c2c2c;
+            color: #e0c097;
+            border-radius: 12px;
+            border: none;
+        }
+
+        .modal-header {
+            background-color: #1a1a1a;
+            color: #e0c097;
+            border-bottom: none;
+        }
+
+        .btn-close {
+            filter: invert(80%) sepia(15%) saturate(200%) hue-rotate(30deg);
+        }
+
+        .modal-body .form-control {
+            background-color: #3a3a3a;
+            color: #e0c097;
+            border: 1px solid #555;
+            border-radius: 6px;
+        }
+
+        .modal-body .form-control::placeholder {
+            color: #b8a982;
+            opacity: 0.8;
+        }
+
+        .modal-body small.text-muted {
+            color: #b8a982;
+        }
+
+        .modal-body .form-control:focus {
+            background-color: #3a3a3a;
+            color: #e0c097;
+            border-color: #e0c097;
+            box-shadow: none;
+        }
+
+        .modal-footer {
+            background-color: #1a1a1a;
+            border-top: none;
+        }
+
+        .modal-footer .btn-warning {
+            background-color: #ffc107;
+            color: #1c1c1c;
+            border: none;
+            font-weight: 600;
+        }
+
+        .modal-footer .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+        .modal-footer .btn-primary {
+            background-color: #e0c097;
+            color: #1c1c1c;
+            border: none;
+            font-weight: 600;
+        }
+
+        .modal-footer .btn-primary:hover {
+            background-color: #c9a87a;
+        }
+
+        .alert {
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand" href="#">Funeraria Elegante</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link active" th:href="@{/usuarios}">Usuarios</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/profesionales}">Profesionales</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/servicios}">Servicios</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/citas/nueva}">Agendar Cita</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/citas/historial}">Historial</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+<!-- Contenido principal -->
+<div class="container content-container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Lista de Usuarios</h3>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#usuarioModal" onclick="limpiarFormulario()">+ Nuevo Usuario</button>
+    </div>
+
+    <table class="table table-hover table-striped align-middle table-dark-custom">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="u : ${usuarios}">
+                <td th:text="${u.id}"></td>
+                <td th:text="${u.nombre}"></td>
+                <td th:text="${u.email}"></td>
+                <td th:text="${u.telefono}"></td>
+                <td class="text-center">
+                    <button class="btn btn-warning btn-sm"
+                            data-bs-toggle="modal" data-bs-target="#usuarioModal"
+                            th:data-id="${u.id}"
+                            th:data-nombre="${u.nombre}"
+                            th:data-email="${u.email}"
+                            th:data-telefono="${u.telefono}"
+                            onclick="editarUsuarioModal(this)">Editar</button>
+                    <a th:href="@{/usuarios/eliminar/{id}(id=${u.id})}" class="btn btn-danger btn-sm"
+                       onclick="return confirm('¿Seguro que desea eliminar este usuario?');">Eliminar</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="usuarioModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form th:action="@{/usuarios/guardar}" method="post" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Nuevo Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="id" name="id"/>
+                <div class="mb-3">
+                    <label>Nombre</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese el nombre" required/>
+                </div>
+                <div class="mb-3">
+                    <label>Email</label>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Ingrese el email" required/>
+                </div>
+                <div class="mb-3">
+                    <label>Teléfono</label>
+                    <input type="text" class="form-control" id="telefono" name="telefono" placeholder="Ingrese el teléfono"/>
+                </div>
+                <div class="mb-3">
+                    <label>Contraseña</label>
+                    <input type="password" class="form-control" id="nuevaPassword" name="nuevaPassword" placeholder="Nueva contraseña"/>
+                    <small class="text-muted">Solo llenar si desea cambiar la contraseña</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function editarUsuarioModal(btn) {
+        document.getElementById('modalTitle').innerText = 'Editar Usuario';
+        document.getElementById('id').value = btn.getAttribute('data-id');
+        document.getElementById('nombre').value = btn.getAttribute('data-nombre');
+        document.getElementById('email').value = btn.getAttribute('data-email');
+        document.getElementById('telefono').value = btn.getAttribute('data-telefono');
+        document.getElementById('nuevaPassword').value = '';
+    }
+
+    function limpiarFormulario() {
+        document.getElementById('modalTitle').innerText = 'Nuevo Usuario';
+        document.getElementById('id').value = '';
+        document.getElementById('nombre').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('telefono').value = '';
+        document.getElementById('nuevaPassword').value = '';
+    }
+</script>
+
+</body>
+</html>

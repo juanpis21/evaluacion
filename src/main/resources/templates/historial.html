@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial de Citas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        body {
+            background-color: #1c1c1c;
+            font-family: 'Georgia', serif;
+            color: #f0f0f0;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        /* Navbar oscuro elegante */
+        .navbar {
+            background: linear-gradient(90deg, #0d0d0d, #1a1a1a);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+        }
+
+        .navbar-brand {
+            color: #e0c097 !important;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .navbar-nav .nav-link {
+            color: rgba(224, 192, 151, 0.85);
+            transition: all 0.2s;
+        }
+
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.active {
+            color: #e0c097;
+            transform: scale(1.05);
+        }
+
+        /* Contenedor principal */
+        .content-container {
+            margin-top: 90px;
+            background: #2c2c2c;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+        }
+
+        h3 {
+            color: #e0c097;
+            font-weight: 600;
+        }
+
+        /* Tabla estilizada */
+        .table {
+            background-color: #3a3a3a;
+            color: #e0c097;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table th {
+            background-color: #2c2c2c;
+            color: #e0c097;
+        }
+
+        .table td {
+            background-color: #3a3a3a;
+            color: #e0c097;
+        }
+
+        .table-bordered th,
+        .table-bordered td {
+            border-color: #555;
+        }
+
+        .table tbody tr:hover {
+            background-color: #444;
+            cursor: pointer;
+        }
+
+        /* Botones */
+        .btn-warning {
+            background-color: #e0c097;
+            border: none;
+            color: #1c1c1c;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-warning:hover {
+            background-color: #c9a87a;
+            color: #1c1c1c;
+        }
+    </style>
+</head>
+<body>
+
+	<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+	    <div class="container-fluid px-4">
+	        <a class="navbar-brand" href="#">Funeraria Elegante</a>
+	        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+	            <span class="navbar-toggler-icon"></span>
+	        </button>
+	        <div class="collapse navbar-collapse" id="navbarNav">
+	            <ul class="navbar-nav ms-auto">
+	                <li class="nav-item"><a class="nav-link active" th:href="@{/usuarios}">Usuarios</a></li>
+	                <li class="nav-item"><a class="nav-link" th:href="@{/profesionales}">Profesionales</a></li>
+	                <li class="nav-item"><a class="nav-link" th:href="@{/servicios}">Servicios</a></li>
+	                <li class="nav-item"><a class="nav-link" th:href="@{/citas/nueva}">Agendar Cita</a></li>
+	                <li class="nav-item"><a class="nav-link" th:href="@{/citas/historial}">Historial</a></li>
+	            </ul>
+	        </div>
+	    </div>
+	</nav>
+
+
+<div class="container content-container">
+    <h3 class="mb-4">Historial de Citas</h3>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Profesional</th>
+                <th>Servicio</th>
+                <th>Fecha y Hora</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="cita : ${citas}">
+                <td th:text="${cita.id}">1</td>
+                <td th:text="${cita.usuario.nombre}">Nombre Usuario</td>
+                <td th:text="${cita.profesional.especialidad}">Especialidad</td>
+                <td th:text="${cita.servicio.nombre}">Servicio</td>
+                <td th:text="${#temporals.format(cita.fechaHora, 'yyyy-MM-dd HH:mm')}">2025-10-30 14:00</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a th:href="@{/citas/nueva}" class="btn btn-warning mt-3">Agendar Nueva Cita</a>
+</div>
+
+</body>
+</html>

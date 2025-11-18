@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Registro - Funeraria</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background: #1c1c1c; /* fondo oscuro sobrio */
+            color: #f0f0f0;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 320px;
+            padding: 30px;
+            background: #2c2c2c; /* gris oscuro */
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-weight: normal;
+            color: #e0c097; /* color dorado suave */
+        }
+
+        input {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input[type="email"], input[type="password"], input[type="text"] {
+            background: #3a3a3a;
+            color: #f0f0f0;
+        }
+
+        input::placeholder {
+            color: #bbb;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #e0c097; /* dorado suave */
+            color: #1c1c1c;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #c9a87a;
+        }
+
+        .error {
+            color: #ff6b6b;
+            margin-top: 10px;
+        }
+
+        .mensaje {
+            color: #6bff6b;
+            margin-top: 10px;
+        }
+
+        a {
+            color: #e0c097;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        p {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Registro Funeraria</h2>
+
+    <!-- Importante: usa nuevaPassword, no password -->
+    <form th:action="@{/auth/register}" th:object="${usuario}" method="post">
+        <input type="text" th:field="*{nombre}" placeholder="Nombre completo" required />
+        <input type="email" th:field="*{email}" placeholder="Correo electrónico" required />
+		<input type="password" th:field="*{nuevaPassword}" placeholder="Contraseña" required />
+        <input type="text" th:field="*{telefono}" placeholder="Teléfono" />
+        <button type="submit">Registrar</button>
+    </form>
+
+    <p th:if="${error}" th:text="${error}" class="error"></p>
+    <p th:if="${mensaje}" th:text="${mensaje}" class="mensaje"></p>
+
+    <p>¿Ya tienes cuenta? <a th:href="@{/auth/login}">Inicia sesión</a></p>
+</div>
+</body>
+</html>
