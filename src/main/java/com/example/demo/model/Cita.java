@@ -95,5 +95,15 @@ public class Cita {
 		return "Cita [id=" + id + ", fechaHora=" + fechaHora + ", estado=" + estado + ", usuario=" + usuario
 				+ ", servicio=" + servicio + ", profesional=" + profesional + "]";
 	}
+
+	public Object getObservaciones() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void setObservaciones(Object observaciones) {
+		// TODO Auto-generated method stub
+		
+	}
     
 }

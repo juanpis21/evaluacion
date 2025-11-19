@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Citas - Funeraria</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #1c1c1c;
+            color: #f0f0f0;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, #000000, #2c2c2c);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .navbar-brand, .nav-link {
+            color: #e0c097 !important;
+        }
+
+        .content-container {
+            margin-top: 100px;
+            background-color: #2c2c2c;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        h3 {
+            color: #e0c097;
+        }
+
+        .table-dark-custom {
+            background-color: #2c2c2c;
+            color: #e0c097;
+        }
+
+        .table-dark-custom thead th {
+            background-color: #1a1a1a;
+            color: #e0c097;
+            border-color: #444;
+        }
+
+        .table-dark-custom tbody td {
+            background-color: #2c2c2c;
+            color: #e0c097;
+            border-color: #444;
+        }
+
+        .badge-pendiente { background-color: #ffc107; color: #000; }
+        .badge-aceptada { background-color: #198754; color: #fff; }
+        .badge-rechazada { background-color: #dc3545; color: #fff; }
+        .badge-completada { background-color: #0dcaf0; color: #000; }
+
+        .btn-primary { background-color: #e0c097; color: #1c1c1c; border: none; }
+        .btn-warning { background-color: #ffc107; color: #1c1c1c; border: none; }
+        .btn-danger { background-color: #dc3545; border: none; }
+        .btn-success { background-color: #198754; border: none; }
+        .btn-info { background-color: #0dcaf0; color: #000; border: none; }
+
+        .modal-content {
+            background-color: #2c2c2c;
+            color: #e0c097;
+            border-radius: 12px;
+        }
+
+        .modal-header {
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #444;
+        }
+
+        .form-control, .form-select {
+            background-color: #1a1a1a;
+            border: 1px solid #444;
+            color: #e0c097;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: #1a1a1a;
+            border-color: #e0c097;
+            color: #e0c097;
+            box-shadow: 0 0 0 0.2rem rgba(224, 192, 151, 0.25);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand" href="#">Funeraria Elegante</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" th:href="@{/usuarios}">Usuarios</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/profesionales}">Profesionales</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/servicios}">Servicios</a></li>
+                <li class="nav-item"><a class="nav-link active" th:href="@{/citas}">Gestión de Citas</a></li>
+				<li class="nav-item"><a class="nav-link" th:href="@{/citas/historial}">Historial</a></li>
+
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container content-container">
+    <!-- Alertas -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Gestión de Citas</h3>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevaCitaModal">
+            <i class="fas fa-plus"></i> Nueva Cita
+        </button>
+    </div>
+
+    <!-- Tabla de citas -->
+    <div class="table-responsive">
+        <table class="table table-hover table-striped align-middle table-dark-custom">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Servicio</th>
+                    <th>Profesional</th>
+                    <th>Fecha y Hora</th>
+                    <th>Estado</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="c : ${citas}">
+                    <td th:text="${c.id}"></td>
+                    <td th:text="${c.usuario.nombre}"></td>
+                    <td th:text="${c.servicio.nombre}"></td>
+                    <td th:text="${c.profesional.nombre}"></td>
+                    <td th:text="${#temporals.format(c.fechaHora, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td>
+                        <span th:classappend="'badge ' + 
+                            ${c.estado == 'pendiente' ? 'badge-pendiente' : 
+                              c.estado == 'aceptada' ? 'badge-aceptada' :
+                              c.estado == 'rechazada' ? 'badge-rechazada' :
+                              'badge-completada'}"
+                            th:text="${c.estado}">
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <div class="btn-group" role="group">
+                            <!-- Botón Editar -->
+                            <button class="btn btn-warning btn-sm btn-editar" 
+                                    th:attr="data-id=${c.id},
+                                             data-usuario=${c.usuario.id},
+                                             data-profesional=${c.profesional.id},
+                                             data-servicio=${c.servicio.id},
+                                             data-fecha=${#temporals.format(c.fechaHora, 'yyyy-MM-dd') + 'T' + #temporals.format(c.fechaHora, 'HH:mm')}"
+                                    title="Editar cita">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+
+                            <!-- Botón Cambiar Estado -->
+                            <button class="btn btn-info btn-sm btn-estado" 
+                                    th:attr="data-id=${c.id},
+                                             data-estado=${c.estado},
+                                             data-usuario-nombre=${c.usuario.nombre},
+                                             data-servicio-nombre=${c.servicio.nombre}"
+                                    title="Cambiar estado">
+                                <i class="fas fa-exchange-alt"></i> Estado
+                            </button>
+
+                            <!-- Botón Eliminar -->
+                            <button class="btn btn-danger btn-sm btn-eliminar"
+                                    th:attr="data-id=${c.id},
+                                             data-usuario-nombre=${c.usuario.nombre},
+                                             data-servicio-nombre=${c.servicio.nombre}"
+                                    title="Eliminar cita">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr th:if="${#lists.isEmpty(citas)}">
+                    <td colspan="7" class="text-center py-4">
+                        <div class="text-muted">
+                            <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                            <p class="mb-0">No hay citas registradas</p>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal para NUEVA CITA -->
+<div class="modal fade" id="nuevaCitaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus me-2"></i>Nueva Cita</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form th:action="@{/citas/guardar}" method="post" id="formNuevaCita">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Cliente</label>
+                            <select class="form-select" name="usuarioId" required>
+                                <option value="">Seleccionar cliente...</option>
+                                <option th:each="usuario : ${usuarios}"
+                                        th:value="${usuario.id}"
+                                        th:text="${usuario.nombre}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Profesional</label>
+                            <select class="form-select" name="profesionalId" required>
+                                <option value="">Seleccionar profesional...</option>
+                                <option th:each="profesional : ${profesionales}"
+                                        th:value="${profesional.id}"
+                                        th:text="${profesional.nombre}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Servicio</label>
+                            <select class="form-select" name="servicioId" required>
+                                <option value="">Seleccionar servicio...</option>
+                                <option th:each="servicio : ${servicios}"
+                                        th:value="${servicio.id}"
+                                        th:text="${servicio.nombre}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha y Hora</label>
+                            <input type="datetime-local" class="form-control" name="fechaHora" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cita</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para EDITAR CITA -->
+<div class="modal fade" id="editarCitaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Editar Cita</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form th:action="@{/citas/editar}" method="post" id="formEditarCita">
+                <input type="hidden" name="id" id="editarCitaId">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Cliente</label>
+                            <select class="form-select" name="usuarioId" id="editarUsuarioId" required>
+                                <option value="">Seleccionar cliente...</option>
+                                <option th:each="usuario : ${usuarios}"
+                                        th:value="${usuario.id}"
+                                        th:text="${usuario.nombre}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Profesional</label>
+                            <select class="form-select" name="profesionalId" id="editarProfesionalId" required>
+                                <option value="">Seleccionar profesional...</option>
+                                <option th:each="profesional : ${profesionales}"
+                                        th:value="${profesional.id}"
+                                        th:text="${profesional.nombre}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Servicio</label>
+                            <select class="form-select" name="servicioId" id="editarServicioId" required>
+                                <option value="">Seleccionar servicio...</option>
+                                <option th:each="servicio : ${servicios}"
+                                        th:value="${servicio.id}"
+                                        th:text="${servicio.nombre}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha y Hora</label>
+                            <input type="datetime-local" class="form-control" name="fechaHora" id="editarFechaHora" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Actualizar Cita</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para CAMBIAR ESTADO -->
+<div class="modal fade" id="estadoCitaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-exchange-alt me-2"></i>Cambiar Estado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p>Cambiar estado de la cita <strong id="estadoCitaId"></strong></p>
+                <p class="text-muted small" id="estadoCitaInfo"></p>
+                <div class="d-grid gap-2">
+                    <form th:action="@{/citas/aceptar}" method="post" class="d-inline">
+                        <input type="hidden" name="id" id="aceptarCitaId">
+                        <button type="submit" class="btn btn-success w-100 mb-2">
+                            <i class="fas fa-check me-1"></i>Aceptar Cita
+                        </button>
+                    </form>
+                    <form th:action="@{/citas/rechazar}" method="post" class="d-inline">
+                        <input type="hidden" name="id" id="rechazarCitaId">
+                        <button type="submit" class="btn btn-warning w-100 mb-2">
+                            <i class="fas fa-times me-1"></i>Rechazar Cita
+                        </button>
+                    </form>
+                    <form th:action="@{/citas/completar}" method="post" class="d-inline">
+                        <input type="hidden" name="id" id="completarCitaId">
+                        <button type="submit" class="btn btn-info w-100">
+                            <i class="fas fa-flag-checkered me-1"></i>Completar Cita
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para ELIMINAR CITA -->
+<div class="modal fade" id="eliminarCitaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="alert alert-warning border-0 bg-dark text-warning">
+                    <i class="fas fa-exclamation-circle fa-2x mb-3"></i>
+                    <h6>¿Estás seguro de eliminar esta cita?</h6>
+                    <p class="mb-2 small" id="eliminarCitaInfo"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form th:action="@{/citas/eliminar}" method="post" class="d-inline">
+                    <input type="hidden" name="id" id="eliminarCitaId">
+                    <button type="submit" class="btn btn-danger">Eliminar Definitivamente</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Event listeners para los botones
+    document.addEventListener('DOMContentLoaded', function() {
+        // Botones de editar
+        document.querySelectorAll('.btn-editar').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const citaId = this.getAttribute('data-id');
+                const usuarioId = this.getAttribute('data-usuario');
+                const profesionalId = this.getAttribute('data-profesional');
+                const servicioId = this.getAttribute('data-servicio');
+                const fechaHora = this.getAttribute('data-fecha');
+                
+                cargarDatosEdicion(citaId, usuarioId, profesionalId, servicioId, fechaHora);
+            });
+        });
+
+        // Botones de estado
+        document.querySelectorAll('.btn-estado').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const citaId = this.getAttribute('data-id');
+                const estadoActual = this.getAttribute('data-estado');
+                const usuarioNombre = this.getAttribute('data-usuario-nombre');
+                const servicioNombre = this.getAttribute('data-servicio-nombre');
+                
+                cargarEstadoCita(citaId, estadoActual, usuarioNombre, servicioNombre);
+            });
+        });
+
+        // Botones de eliminar
+        document.querySelectorAll('.btn-eliminar').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const citaId = this.getAttribute('data-id');
+                const nombreUsuario = this.getAttribute('data-usuario-nombre');
+                const nombreServicio = this.getAttribute('data-servicio-nombre');
+                
+                confirmarEliminacion(citaId, nombreUsuario, nombreServicio);
+            });
+        });
+
+        // Cerrar alertas automáticamente
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                bootstrap.Alert.getOrCreateInstance(alert).close();
+            });
+        }, 5000);
+
+        // Validación de fecha futura
+        const fechaInputs = document.querySelectorAll('input[type="datetime-local"]');
+        fechaInputs.forEach(input => {
+            // Establecer la fecha mínima como la fecha actual
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            input.min = now.toISOString().slice(0, 16);
+        });
+    });
+
+    // Cargar datos para edición
+    function cargarDatosEdicion(citaId, usuarioId, profesionalId, servicioId, fechaHora) {
+        document.getElementById('editarCitaId').value = citaId;
+        document.getElementById('editarUsuarioId').value = usuarioId;
+        document.getElementById('editarProfesionalId').value = profesionalId;
+        document.getElementById('editarServicioId').value = servicioId;
+        document.getElementById('editarFechaHora').value = fechaHora;
+        
+        const modal = new bootstrap.Modal(document.getElementById('editarCitaModal'));
+        modal.show();
+    }
+
+    // Cargar datos para cambiar estado
+    function cargarEstadoCita(citaId, estadoActual, usuarioNombre, servicioNombre) {
+        document.getElementById('aceptarCitaId').value = citaId;
+        document.getElementById('rechazarCitaId').value = citaId;
+        document.getElementById('completarCitaId').value = citaId;
+        document.getElementById('estadoCitaId').textContent = '#' + citaId;
+        document.getElementById('estadoCitaInfo').textContent = 
+            `Cliente: ${usuarioNombre} | Servicio: ${servicioNombre} | Estado actual: ${estadoActual}`;
+        
+        const modal = new bootstrap.Modal(document.getElementById('estadoCitaModal'));
+        modal.show();
+    }
+
+    // Confirmar eliminación
+    function confirmarEliminacion(citaId, nombreUsuario, nombreServicio) {
+        document.getElementById('eliminarCitaId').value = citaId;
+        document.getElementById('eliminarCitaInfo').textContent = 
+            `Cliente: ${nombreUsuario} | Servicio: ${nombreServicio}`;
+        
+        const modal = new bootstrap.Modal(document.getElementById('eliminarCitaModal'));
+        modal.show();
+    }
+</script>
+
+</body>
+</html>

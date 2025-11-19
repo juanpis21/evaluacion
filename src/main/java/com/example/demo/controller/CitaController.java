@@ -1,86 +1,198 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Cita;
-import com.example.demo.model.Usuario;
-import com.example.demo.model.Profesional;
-import com.example.demo.model.Servicio;
-import com.example.demo.repository.CitaRepository;
-import com.example.demo.repository.UsuarioRepository;
-import com.example.demo.repository.ProfesionalRepository;
-import com.example.demo.repository.ServicioRepository;
+import com.example.demo.service.CitaService;
+import com.example.demo.service.UsuarioService;
+import com.example.demo.service.ProfesionalService;
+import com.example.demo.service.ServicioService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
+@RequestMapping("/citas")
 public class CitaController {
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private CitaService citaService;
 
     @Autowired
-    private ProfesionalRepository profesionalRepository;
+    private UsuarioService usuarioService;
 
     @Autowired
-    private ServicioRepository servicioRepository;
+    private ProfesionalService profesionalService;
 
     @Autowired
-    private CitaRepository citaRepository;
-    
-    @GetMapping("/citas/nueva")
-    public String mostrarFormulario(Model model) {
-        List<Usuario> usuarios = usuarioRepository.findAll();
-        List<Profesional> profesionales = profesionalRepository.findAll();
-        List<Servicio> servicios = servicioRepository.findAll();
+    private ServicioService servicioService;
 
-        model.addAttribute("usuarios", usuarios);
-        model.addAttribute("profesionales", profesionales);
-        model.addAttribute("servicios", servicios);
-
-        return "nueva-cita";
-    }
-    @PostMapping("/citas/nueva")
-    public String crearCita( @RequestParam("usuarioId") Integer usuarioId,@RequestParam("profesionalId") Integer profesionalId,@RequestParam("servicioId") Integer servicioId,
-            @RequestParam("fechaHora") String fechaHora,
-            Model model
-    ) {
+    // ✅ LISTADO PRINCIPAL
+    @GetMapping
+    public String listarCitas(Model model) {
         try {
-            Usuario usuario = usuarioRepository.findById(usuarioId)
-                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
-
-            Profesional profesional = profesionalRepository.findById(profesionalId)
-                    .orElseThrow(() -> new IllegalArgumentException("Profesional no encontrado"));
-
-            Servicio servicio = servicioRepository.findById(servicioId)
-                    .orElseThrow(() -> new IllegalArgumentException("Servicio no encontrado"));
-
-            Cita cita = new Cita();
-            cita.setUsuario(usuario);
-            cita.setProfesional(profesional);
-            cita.setServicio(servicio);
-            cita.setFechaHora(LocalDateTime.parse(fechaHora));
-            citaRepository.save(cita);
-            return "redirect:/citas/historial";
-
+            model.addAttribute("citas", citaService.findAll());
+            model.addAttribute("usuarios", usuarioService.findAll());
+            model.addAttribute("profesionales", profesionalService.findAll());
+            model.addAttribute("servicios", servicioService.findAll());
+            return "citas";
         } catch (Exception e) {
-            model.addAttribute("error", "Ocurrió un error al agendar la cita: " + e.getMessage());
-            model.addAttribute("usuarios", usuarioRepository.findAll());
-            model.addAttribute("profesionales", profesionalRepository.findAll());
-            model.addAttribute("servicios", servicioRepository.findAll());
-            return "nueva-cita";
+            model.addAttribute("error", "Error al cargar las citas: " + e.getMessage());
+            return "citas";
         }
     }
-    @GetMapping("/citas/historial")
-    public String mostrarHistorial(Model model) {
-        List<Cita> citas = citaRepository.findAll();
-        model.addAttribute("citas", citas);
+
+    // ✅ GUARDAR NUEVA CITA
+    @PostMapping("/guardar")
+    public String guardarCita(
+            @RequestParam Integer usuarioId,
+            @RequestParam Integer profesionalId,
+            @RequestParam Integer servicioId,
+            @RequestParam String fechaHora,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            // Validaciones
+            if (usuarioId == null || profesionalId == null || servicioId == null || 
+                fechaHora == null || fechaHora.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Todos los campos son obligatorios.");
+                return "redirect:/citas";
+            }
+
+            LocalDateTime fecha = LocalDateTime.parse(fechaHora);
+            
+            if (fecha.isBefore(LocalDateTime.now())) {
+                redirectAttributes.addFlashAttribute("error", "La fecha debe ser futura.");
+                return "redirect:/citas";
+            }
+
+            Cita cita = new Cita();
+            cita.setUsuario(usuarioService.findById(usuarioId).orElse(null));
+            cita.setProfesional(profesionalService.findById(profesionalId).orElse(null));
+            cita.setServicio(servicioService.findById(servicioId).orElse(null));
+            cita.setFechaHora(fecha);
+            cita.setEstado("pendiente");
+
+            citaService.save(cita);
+            redirectAttributes.addFlashAttribute("success", "Cita creada correctamente.");
+
+        } catch (DateTimeParseException e) {
+            redirectAttributes.addFlashAttribute("error", "Formato de fecha inválido.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al crear la cita: " + e.getMessage());
+        }
+
+        return "redirect:/citas";
+    }
+
+    // ✅ ACTUALIZAR CITA EXISTENTE
+    @PostMapping("/editar")
+    public String actualizarCita(
+            @RequestParam Integer id,
+            @RequestParam Integer usuarioId,
+            @RequestParam Integer profesionalId,
+            @RequestParam Integer servicioId,
+            @RequestParam String fechaHora,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            Optional<Cita> citaExistente = citaService.findById(id);
+            if (!citaExistente.isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "La cita no existe.");
+                return "redirect:/citas";
+            }
+
+            LocalDateTime fecha = LocalDateTime.parse(fechaHora);
+            
+            if (fecha.isBefore(LocalDateTime.now())) {
+                redirectAttributes.addFlashAttribute("error", "La fecha debe ser futura.");
+                return "redirect:/citas";
+            }
+
+            Cita cita = citaExistente.get();
+            cita.setUsuario(usuarioService.findById(usuarioId).orElse(null));
+            cita.setProfesional(profesionalService.findById(profesionalId).orElse(null));
+            cita.setServicio(servicioService.findById(servicioId).orElse(null));
+            cita.setFechaHora(fecha);
+
+            citaService.save(cita);
+            redirectAttributes.addFlashAttribute("success", "Cita actualizada correctamente.");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al actualizar la cita: " + e.getMessage());
+        }
+
+        return "redirect:/citas";
+    }
+
+    // ✅ ELIMINAR CITA
+    @PostMapping("/eliminar")
+    public String eliminarCita(@RequestParam Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            Optional<Cita> cita = citaService.findById(id);
+            if (!cita.isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "La cita no existe.");
+                return "redirect:/citas";
+            }
+            
+            citaService.delete(id);
+            redirectAttributes.addFlashAttribute("success", "Cita eliminada correctamente.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al eliminar la cita: " + e.getMessage());
+        }
+        return "redirect:/citas";
+    }
+
+    // ✅ CAMBIAR ESTADO - ACEPTAR
+    @PostMapping("/aceptar")
+    public String aceptarCita(@RequestParam Integer id, RedirectAttributes redirectAttributes) {
+        return cambiarEstadoCita(id, "aceptada", redirectAttributes);
+    }
+
+    // ✅ CAMBIAR ESTADO - RECHAZAR
+    @PostMapping("/rechazar")
+    public String rechazarCita(@RequestParam Integer id, RedirectAttributes redirectAttributes) {
+        return cambiarEstadoCita(id, "rechazada", redirectAttributes);
+    }
+
+    // ✅ CAMBIAR ESTADO - COMPLETAR
+    @PostMapping("/completar")
+    public String completarCita(@RequestParam Integer id, RedirectAttributes redirectAttributes) {
+        return cambiarEstadoCita(id, "completada", redirectAttributes);
+    }
+
+    // ✅ MÉTODO PRIVADO PARA CAMBIAR ESTADO
+    private String cambiarEstadoCita(Integer id, String estado, RedirectAttributes redirectAttributes) {
+        try {
+            Optional<Cita> cita = citaService.findById(id);
+            if (!cita.isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "La cita no existe.");
+                return "redirect:/citas";
+            }
+
+            Cita citaActualizada = cita.get();
+            citaActualizada.setEstado(estado);
+            citaService.save(citaActualizada);
+
+            redirectAttributes.addFlashAttribute("success", "Cita " + estado + " correctamente.");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al cambiar el estado: " + e.getMessage());
+        }
+
+        return "redirect:/citas";
+    }
+
+    // ✅ HISTORIAL
+    @GetMapping("/historial")
+    public String verHistorial(Model model) {
+        model.addAttribute("citas", citaService.findAll());
         return "historial";
     }
 }

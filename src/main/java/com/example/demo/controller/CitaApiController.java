@@ -1,20 +1,19 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Cita;
-import com.example.demo.model.Usuario;
-import com.example.demo.model.Profesional;
-import com.example.demo.model.Servicio;
 import com.example.demo.service.CitaService;
 import com.example.demo.service.UsuarioService;
 import com.example.demo.service.ProfesionalService;
 import com.example.demo.service.ServicioService;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -33,278 +32,180 @@ public class CitaApiController {
     @Autowired
     private ServicioService servicioService;
 
-    // ✅ ENDPOINT DE PRUEBA
-    @GetMapping("/test")
-    public Map<String, String> test() {
-        Map<String, String> response = new HashMap<>();
-        response.put("status", "success");
-        response.put("message", "✅ API Citas FUNCIONANDO!");
-        return response;
-    }
-
-    // ✅ CREAR CITA
-    @PostMapping("/crear")
-    public Map<String, Object> crearCita(@RequestBody Map<String, Object> citaData) {
-        Map<String, Object> response = new HashMap<>();
-        
-        try {
-            Integer usuarioId = citaData.get("usuarioId") != null ? 
-                Integer.valueOf(citaData.get("usuarioId").toString()) : null;
-            Integer profesionalId = citaData.get("profesionalId") != null ? 
-                Integer.valueOf(citaData.get("profesionalId").toString()) : null;
-            Integer servicioId = citaData.get("servicioId") != null ? 
-                Integer.valueOf(citaData.get("servicioId").toString()) : null;
-            String fechaHora = (String) citaData.get("fechaHora");
-
-            // Validar campos requeridos
-            if (usuarioId == null || profesionalId == null || servicioId == null || fechaHora == null) {
-                response.put("status", "error");
-                response.put("message", "Todos los campos son obligatorios: usuarioId, profesionalId, servicioId, fechaHora");
-                return response;
-            }
-
-            // Verificar que existan las entidades relacionadas
-            Optional<Usuario> usuario = usuarioService.findById(usuarioId);
-            Optional<Profesional> profesional = profesionalService.findById(profesionalId);
-            Optional<Servicio> servicio = servicioService.findById(servicioId);
-
-            if (!usuario.isPresent()) {
-                response.put("status", "error");
-                response.put("message", "Usuario no encontrado");
-                return response;
-            }
-            if (!profesional.isPresent()) {
-                response.put("status", "error");
-                response.put("message", "Profesional no encontrado");
-                return response;
-            }
-            if (!servicio.isPresent()) {
-                response.put("status", "error");
-                response.put("message", "Servicio no encontrado");
-                return response;
-            }
-
-            // Crear nueva cita
-            Cita cita = new Cita();
-            cita.setUsuario(usuario.get());
-            cita.setProfesional(profesional.get());
-            cita.setServicio(servicio.get());
-            cita.setFechaHora(LocalDateTime.parse(fechaHora));
-            cita.setEstado("pendiente"); // Estado por defecto
-
-            // Guardar cita
-            Cita citaGuardada = citaService.save(cita);
-            
-            response.put("status", "success");
-            response.put("message", "Cita creada correctamente");
-            response.put("cita", citaGuardada);
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.put("status", "error");
-            response.put("message", "Error del servidor: " + e.getMessage());
-        }
-        
-        return response;
-    }
-
-    // ✅ LISTAR TODAS LAS CITAS
-    @GetMapping("/listar")
-    public Map<String, Object> listarCitas() {
-        Map<String, Object> response = new HashMap<>();
-        
+    // ✅ GET - OBTENER TODAS LAS CITAS
+    @GetMapping
+    public ResponseEntity<?> getAllCitas() {
         try {
             List<Cita> citas = citaService.findAll();
-            response.put("status", "success");
-            response.put("citas", citas);
-            response.put("total", citas.size());
+            return ResponseEntity.ok(citas);
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", "Error al obtener citas");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al cargar las citas: " + e.getMessage());
         }
-        
-        return response;
     }
 
-    // ✅ OBTENER CITA POR ID
+    // ✅ GET - OBTENER CITA POR ID
     @GetMapping("/{id}")
-    public Map<String, Object> obtenerCita(@PathVariable Integer id) {
-        Map<String, Object> response = new HashMap<>();
-        
+    public ResponseEntity<?> getCitaById(@PathVariable Integer id) {
         try {
             Optional<Cita> cita = citaService.findById(id);
             if (cita.isPresent()) {
-                response.put("status", "success");
-                response.put("cita", cita.get());
+                return ResponseEntity.ok(cita.get());
             } else {
-                response.put("status", "error");
-                response.put("message", "Cita no encontrada");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Cita no encontrada con ID: " + id);
             }
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", "Error al obtener cita");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al buscar la cita: " + e.getMessage());
         }
-        
-        return response;
     }
 
-    // ✅ OBTENER CITAS POR USUARIO
-    @GetMapping("/usuario/{usuarioId}")
-    public Map<String, Object> obtenerCitasPorUsuario(@PathVariable Integer usuarioId) {
-        Map<String, Object> response = new HashMap<>();
-        
+    // ✅ POST - CREAR NUEVA CITA
+    @PostMapping
+    public ResponseEntity<?> createCita(@RequestBody CitaRequest request) {
         try {
-            List<Cita> citas = citaService.obtenerCitasPorUsuario(usuarioId);
-            response.put("status", "success");
-            response.put("citas", citas);
-            response.put("total", citas.size());
-            response.put("usuarioId", usuarioId);
+            // Validaciones
+            if (request.getUsuarioId() == null || request.getProfesionalId() == null || 
+                request.getServicioId() == null || request.getFechaHora() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Todos los campos son obligatorios.");
+            }
+
+            LocalDateTime fecha = LocalDateTime.parse(request.getFechaHora());
+            
+            if (fecha.isBefore(LocalDateTime.now())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("La fecha debe ser futura.");
+            }
+
+            Cita cita = new Cita();
+            cita.setUsuario(usuarioService.findById(request.getUsuarioId()).orElse(null));
+            cita.setProfesional(profesionalService.findById(request.getProfesionalId()).orElse(null));
+            cita.setServicio(servicioService.findById(request.getServicioId()).orElse(null));
+            cita.setFechaHora(fecha);
+            cita.setEstado("pendiente");
+
+            Cita savedCita = citaService.save(cita);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedCita);
+
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Formato de fecha inválido. Use: YYYY-MM-DDTHH:MM:SS");
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", "Error al obtener citas del usuario");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al crear la cita: " + e.getMessage());
         }
-        
-        return response;
     }
 
-    // ✅ ACTUALIZAR CITA (PUT)
+    // ✅ PUT - ACTUALIZAR CITA EXISTENTE
     @PutMapping("/{id}")
-    public Map<String, Object> actualizarCita(@PathVariable Integer id, @RequestBody Map<String, Object> citaData) {
-        Map<String, Object> response = new HashMap<>();
-        
+    public ResponseEntity<?> updateCita(@PathVariable Integer id, @RequestBody CitaRequest request) {
         try {
             Optional<Cita> citaExistente = citaService.findById(id);
             if (!citaExistente.isPresent()) {
-                response.put("status", "error");
-                response.put("message", "Cita no encontrada");
-                return response;
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("La cita no existe.");
+            }
+
+            LocalDateTime fecha = LocalDateTime.parse(request.getFechaHora());
+            
+            if (fecha.isBefore(LocalDateTime.now())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("La fecha debe ser futura.");
             }
 
             Cita cita = citaExistente.get();
-            
-            // Actualizar campos si están presentes
-            if (citaData.get("fechaHora") != null) {
-                cita.setFechaHora(LocalDateTime.parse(citaData.get("fechaHora").toString()));
-            }
-            if (citaData.get("estado") != null) {
-                cita.setEstado(citaData.get("estado").toString());
-            }
-            if (citaData.get("profesionalId") != null) {
-                Integer profesionalId = Integer.valueOf(citaData.get("profesionalId").toString());
-                Optional<Profesional> profesional = profesionalService.findById(profesionalId);
-                if (profesional.isPresent()) {
-                    cita.setProfesional(profesional.get());
-                }
-            }
-            if (citaData.get("servicioId") != null) {
-                Integer servicioId = Integer.valueOf(citaData.get("servicioId").toString());
-                Optional<Servicio> servicio = servicioService.findById(servicioId);
-                if (servicio.isPresent()) {
-                    cita.setServicio(servicio.get());
-                }
-            }
+            cita.setUsuario(usuarioService.findById(request.getUsuarioId()).orElse(null));
+            cita.setProfesional(profesionalService.findById(request.getProfesionalId()).orElse(null));
+            cita.setServicio(servicioService.findById(request.getServicioId()).orElse(null));
+            cita.setFechaHora(fecha);
 
-            Cita citaActualizada = citaService.save(cita);
-            
-            response.put("status", "success");
-            response.put("message", "Cita actualizada correctamente");
-            response.put("cita", citaActualizada);
-            
+            Cita updatedCita = citaService.save(cita);
+            return ResponseEntity.ok(updatedCita);
+
         } catch (Exception e) {
-            e.printStackTrace();
-            response.put("status", "error");
-            response.put("message", "Error al actualizar cita: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al actualizar la cita: " + e.getMessage());
         }
-        
-        return response;
     }
 
-    // ✅ ELIMINAR CITA (DELETE)
+    // ✅ DELETE - ELIMINAR CITA
     @DeleteMapping("/{id}")
-    public Map<String, Object> eliminarCita(@PathVariable Integer id) {
-        Map<String, Object> response = new HashMap<>();
-        
+    public ResponseEntity<?> deleteCita(@PathVariable Integer id) {
         try {
             Optional<Cita> cita = citaService.findById(id);
             if (!cita.isPresent()) {
-                response.put("status", "error");
-                response.put("message", "Cita no encontrada");
-                return response;
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("La cita no existe.");
             }
-
+            
             citaService.delete(id);
-            response.put("status", "success");
-            response.put("message", "Cita eliminada correctamente");
+            return ResponseEntity.ok().body("Cita eliminada correctamente.");
             
         } catch (Exception e) {
-            e.printStackTrace();
-            response.put("status", "error");
-            response.put("message", "Error al eliminar cita: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar la cita: " + e.getMessage());
         }
-        
-        return response;
     }
 
-    // ✅ CAMBIAR ESTADO DE CITA
-    @PutMapping("/{id}/estado")
-    public Map<String, Object> cambiarEstadoCita(@PathVariable Integer id, @RequestBody Map<String, String> estadoData) {
-        Map<String, Object> response = new HashMap<>();
-        
-        try {
-            Optional<Cita> citaExistente = citaService.findById(id);
-            if (!citaExistente.isPresent()) {
-                response.put("status", "error");
-                response.put("message", "Cita no encontrada");
-                return response;
-            }
-
-            String nuevoEstado = estadoData.get("estado");
-            if (nuevoEstado == null) {
-                response.put("status", "error");
-                response.put("message", "El campo 'estado' es obligatorio");
-                return response;
-            }
-
-            Cita cita = citaExistente.get();
-            cita.setEstado(nuevoEstado);
-
-            Cita citaActualizada = citaService.save(cita);
-            
-            response.put("status", "success");
-            response.put("message", "Estado de cita actualizado correctamente");
-            response.put("cita", citaActualizada);
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.put("status", "error");
-            response.put("message", "Error al cambiar estado de cita: " + e.getMessage());
-        }
-        
-        return response;
+    // ✅ PATCH - CAMBIAR ESTADO (ACEPTAR)
+    @PatchMapping("/{id}/aceptar")
+    public ResponseEntity<?> aceptarCita(@PathVariable Integer id) {
+        return cambiarEstadoCita(id, "aceptada");
     }
 
-    // ✅ OBTENER CITAS POR ESTADO
-    @GetMapping("/estado/{estado}")
-    public Map<String, Object> obtenerCitasPorEstado(@PathVariable String estado) {
-        Map<String, Object> response = new HashMap<>();
-        
+    // ✅ PATCH - CAMBIAR ESTADO (RECHAZAR)
+    @PatchMapping("/{id}/rechazar")
+    public ResponseEntity<?> rechazarCita(@PathVariable Integer id) {
+        return cambiarEstadoCita(id, "rechazada");
+    }
+
+    // ✅ PATCH - CAMBIAR ESTADO (COMPLETAR)
+    @PatchMapping("/{id}/completar")
+    public ResponseEntity<?> completarCita(@PathVariable Integer id) {
+        return cambiarEstadoCita(id, "completada");
+    }
+
+    // ✅ MÉTODO PRIVADO PARA CAMBIAR ESTADO
+    private ResponseEntity<?> cambiarEstadoCita(Integer id, String estado) {
         try {
-            List<Cita> todasCitas = citaService.findAll();
-            // Filtrar por estado
-            List<Cita> citasFiltradas = todasCitas.stream()
-                .filter(c -> c.getEstado() != null && 
-                           c.getEstado().equalsIgnoreCase(estado))
-                .toList();
-            
-            response.put("status", "success");
-            response.put("citas", citasFiltradas);
-            response.put("total", citasFiltradas.size());
-            response.put("estado", estado);
+            Optional<Cita> cita = citaService.findById(id);
+            if (!cita.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("La cita no existe.");
+            }
+
+            Cita citaActualizada = cita.get();
+            citaActualizada.setEstado(estado);
+            Cita savedCita = citaService.save(citaActualizada);
+
+            return ResponseEntity.ok(savedCita);
+
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", "Error al obtener citas por estado");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al cambiar el estado: " + e.getMessage());
         }
+    }
+
+    // ✅ CLASE INTERNA PARA EL REQUEST
+    public static class CitaRequest {
+        private Integer usuarioId;
+        private Integer profesionalId;
+        private Integer servicioId;
+        private String fechaHora;
+
+        // Getters y Setters
+        public Integer getUsuarioId() { return usuarioId; }
+        public void setUsuarioId(Integer usuarioId) { this.usuarioId = usuarioId; }
         
-        return response;
+        public Integer getProfesionalId() { return profesionalId; }
+        public void setProfesionalId(Integer profesionalId) { this.profesionalId = profesionalId; }
+        
+        public Integer getServicioId() { return servicioId; }
+        public void setServicioId(Integer servicioId) { this.servicioId = servicioId; }
+        
+        public String getFechaHora() { return fechaHora; }
+        public void setFechaHora(String fechaHora) { this.fechaHora = fechaHora; }
     }
 }
